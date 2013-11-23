@@ -1,0 +1,4 @@
+LUA = ../../../src/lua
+LUAINC = -I$(LUA)
+LUALIB = -L$(LUA) -llua # Linux
+#LUALIB = $(LUA)/lua5.1.dll # Windows

@@ -1,0 +1,10 @@
+EXT=so
+SOCKET_SO=socket.$(EXT)
+MIME_SO=mime.$(EXT)
+UNIX_SO=unix.$(EXT)
+LUAINC=-I../../../src/lua
+CC=gcc
+DEF=-DLUASOCKET_DEBUG
+CFLAGS= -fPIC $(LUAINC) $(DEF) -pedantic -Wall -O2
+LDFLAGS= -shared -L../../../src/lua -llua
+LD=gcc
