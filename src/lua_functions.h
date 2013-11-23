@@ -22,6 +22,7 @@ static LUA_FUNCTION (flashonradar); // (int target_cn)
 // if
 static LUA_FUNCTION (isconnected); // (int player_cn)
 static LUA_FUNCTION (isadmin); // (int player_cn)
+static LUA_FUNCTION (getpriv); // (int player_cn)
 static LUA_FUNCTION (isonfloor); // (int player_cn)
 static LUA_FUNCTION (isonladder); // (int player_cn)
 static LUA_FUNCTION (isscoping); // (int player_cn)

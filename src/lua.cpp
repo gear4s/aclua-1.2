@@ -467,6 +467,7 @@ void Lua::registerGlobals(lua_State *L) {
   LUA_SET_FUNCTION(dodamage);
   LUA_SET_FUNCTION(isconnected);
   LUA_SET_FUNCTION(isadmin);
+  LUA_SET_FUNCTION(getpriv);
   LUA_SET_FUNCTION(getstate);
   LUA_SET_FUNCTION(getname);
   LUA_SET_FUNCTION(getip);
@@ -1046,6 +1047,15 @@ LUA_FUNCTION(isadmin) {
   int player_cn = (int) lua_tonumber(L, 1);
   if(!valid_client(player_cn)) return 0;
   lua_pushboolean(L, (int)(clients[player_cn]->role == CR_ADMIN));
+  return 1;
+}
+
+LUA_FUNCTION(getpriv) {
+  lua_checkstack(L, 1);
+  if(!lua_isnumber(L, 1)) return 0;
+  int player_cn = (int) lua_tonumber(L, 1);
+  if(!valid_client(player_cn)) return 0;
+  lua_pushinteger(L, (int)(clients[player_cn]->role));
   return 1;
 }
 
