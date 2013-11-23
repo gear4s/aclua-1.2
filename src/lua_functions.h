@@ -1,4 +1,4 @@
-#include "lua/lua.h"
+#include "lua.h"
 
 static LUA_FUNCTION (include);
 static LUA_FUNCTION (strtoiprange); // (string line)

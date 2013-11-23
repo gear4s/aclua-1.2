@@ -3,12 +3,12 @@ DEFINES = -DSTANDALONE
 OBJECT_FLAGS = -O2 -Wall
 DSTDIR = win32_release
 SRCDIR = src
-INCLUDES = -Ienet\include -Iadditions\geoip -Iinclude
-LIBS = -Llib -lzdll -lenet -lws2_32 -lwinmm src\lua\lua5.1.dll
+INCLUDES = -Ienet\include -Iadditions\geoip -Isrc\lua\include
+LIBS = -Llib -lzdll -lenet -lws2_32 -lwinmm -Lsrc\lua -lluajit
 LANES_SRCDIR = src\lanes\src
 LANES_DEFINES = -D_GNU_SOURCE -DNDEBUG
 LANES_OBJECT_FLAGS = $(OBJECT_FLAGS)
-LANES_INCLUDES = -Isrc\lua
+LANES_INCLUDES = -Isrc\lua\include
 
 
 TARGET = $(DSTDIR)\ac_server.exe

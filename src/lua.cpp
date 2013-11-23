@@ -2,14 +2,14 @@
 #include "server.h"
 
 extern "C" {
-  #include "lua/lua.h"
-  #include "lua/lauxlib.h"
-  #include "lua/lualib.h"
+  #include "lua.h"
+  #include "lauxlib.h"
+  #include "lualib.h"
   #include "lanes/src/threading.h"
 }
 
 #include "module.hpp"
-#include "lua.h"
+#include "luamod.h"
 #include "lua_functions.h"
 
 #include <stdlib.h>

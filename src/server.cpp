@@ -11,7 +11,8 @@
 #include "servercontroller.h"
 #include "serverfiles.h"
 
-#include "lua.h"
+#include "luamod.h"
+
 static string lua_scripts_path = LUA_SCRIPTS_PATH;
 int server_protocol_version = SERVER_PROTOCOL_VERSION;
 bool hitreg_fixed = true;

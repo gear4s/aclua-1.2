@@ -8,7 +8,7 @@
 
 #define GZBUFSIZE ((MAXCFGFILESIZE * 11) / 10)
 
-#include "lua.h"
+#include "luamod.h"
 
 struct servermapbuffer  // sending of maps between clients
 {

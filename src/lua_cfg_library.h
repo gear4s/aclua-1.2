@@ -1,5 +1,5 @@
 extern "C" {
-  #include "lua/lua.h"
+  #include "lua.h"
 }
 
 LUALIB_API int luaopen_cfg (lua_State *L);

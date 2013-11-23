@@ -41,7 +41,7 @@ THE SOFTWARE.
 #include "lauxlib.h"
 
 extern "C++" {
-  #include "../../lua.h"
+  #include "../../luamod.h"
 
   void embedLuaModAPI( lua_State *L )
   {

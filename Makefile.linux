@@ -3,12 +3,12 @@ DEFINES = -DSTANDALONE
 OBJECT_FLAGS = -O2 -Wall
 DSTDIR = linux_release
 SRCDIR = src
-INCLUDES = -Ienet/include -Iadditions/geoip -Isrc/lua
-LIBS = -Lenet/.libs -lenet -lz -Lsrc/lua -llua -ldl -lpthread
+INCLUDES = -Ienet/include -Iadditions/geoip -Isrc/lua/include
+LIBS = -Lenet/.libs -lenet -lz -Lsrc/lua -lluajitlin -ldl -lpthread
 LANES_SRCDIR = src/lanes/src
 LANES_DEFINES = -D_GNU_SOURCE -DNDEBUG
 LANES_OBJECT_FLAGS = $(OBJECT_FLAGS)
-LANES_INCLUDES = -Isrc/lua
+LANES_INCLUDES = -Isrc/lua/include
 
 
 MACHINE := $(shell uname -m)
