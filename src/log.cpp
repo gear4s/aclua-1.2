@@ -1,7 +1,7 @@
 // server-side logging of events
 
 #include "cube.h"
-#include "lua.h"
+#include "luamod.h"
 
 #if !defined(WIN32) && !defined(__APPLE__)
 
