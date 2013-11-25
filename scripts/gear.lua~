@@ -1,0 +1,22 @@
+PLUGIN_NAME = "Poo"
+PLUGIN_AUTHOR = "4"
+PLUGIN_VERSION = "4.5"
+
+require "geoip"
+
+-- common
+include("ac_server")
+geoip.load_geoip_database("geoip.dat")
+
+function say(text, cn)
+  if cn == nil then cn = -1 end -- to all
+  clientprint(cn, text)
+end
+
+function onPlayerSayText(cn, msg)
+  
+end
+
+function onPlayerConnect(cn)
+  say(getname(cn) .. " has connected from " .. geoip.ip_to_country(getip(cn)))
+end
