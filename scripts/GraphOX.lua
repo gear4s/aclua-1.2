@@ -6,6 +6,8 @@ PLUGIN_VERSION = "1.2.1" -- 15 August 2012
 
 include("ac_server")  -- load base2 for framework
 
+geoip.load_geoip_database("lua/extra/geoip.dat")
+
 -- load framework
 server.fileload("kickban")
 server.fileload("config")

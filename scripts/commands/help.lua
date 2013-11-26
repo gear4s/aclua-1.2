@@ -18,7 +18,6 @@
 ]]
 local helpdef = {
   -- normal commands below
-  ["pm"] = {false, "Send a private message", {{"cn", "\"text\""}, false}},
   ["stats"] = {false, "View your current stats (e.g. frags)", {false, {"cn"}}},
   ["whois"] = {false, "Get country and (if admin) IP of a certain player", {false, {"cn"}}},
   ["help"] = {false, "Get help on specific commands", {false, {"command"}}},
@@ -32,8 +31,8 @@ local helpdef = {
 
 return function(cn, command)
   if command == nil then
-    messages.notice(cn, "blue<Provides information on commands. For a list of commands type> yellow<\"!cmds\">.", true)
-    messages.notice(cn, "blue<Usage:> yellow<!help {command}>", true)
+    messages.notice("blue<Provides information on commands. For a list of commands type> yellow<\"!cmds\">."):send(cn)
+    messages.notice("blue<Usage:> yellow<!help {command}>"):send(cn)
   else
     if helpdef[command] ~= nil then
       local cmdpat = nil
@@ -43,7 +42,7 @@ return function(cn, command)
         if usage[1] ~= false or usage[2] ~= false then
           cmdpat = string.format(" blue<- usage:> %s ", command)
           if usage[1] ~= false then
-            cmdpat = cmdpat .. string.format("accol:M<(%s)>", table.concat(usage[1], ") ("))
+            cmdpat = cmdpat .. string.format("blue<(%s)>", table.concat(usage[1], ") ("))
           end
 
           if usage[2] ~= false then
@@ -51,7 +50,7 @@ return function(cn, command)
           end
         end
 
-        messages.notice({cn}, string.format("blue<Help on the \">yellow<%s>blue<\" command:> green<%s>%s", command, def, _if(cmdpat ~= nil, cmdpat, ""), true))
+        messages.notice("blue<Help on the \">yellow<%s>blue<\" command:> green<%s>%s"):format(command, def, cmdpat ~= nil and cmdpat or "")):send(cn)
       else
         return false, string.format("Administrator privileges is> blue<required> red<to retrieve help on the %s command.", command)
       end

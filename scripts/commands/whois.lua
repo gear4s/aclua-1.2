@@ -15,5 +15,5 @@ return function (cn, tcn)
     msg = msg .. string.format(" blue<- IP:> green<%s>", getip(n))
   end
 
-  messages.notice(cn, msg, true)
+  messages.notice(msg):send(cn)
 end

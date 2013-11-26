@@ -2,7 +2,7 @@ local uc = require "uppercut"
 
 local filename = "server" -- server.log
 
-local logfile = io.open("log\\" .. filename .. ".log","a+")
+local logfile = io.open("log/" .. filename .. ".log","a+")
 
 --[[
 

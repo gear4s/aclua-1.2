@@ -45,11 +45,11 @@ local PLAYER_VALID_COMMANDS = {}
 function command.load_player_command_script(dir, filename, args, cn)
   local callback, error = assert(loadfile(PLAYER_COMMAND_SCRIPT_DIRECTORIES[dir]["path"]..filename..".lua"))()
   if not callback then
-    messages.notice(cn, "red<No function loaded for player command "..command..">", true)
+    messages.notice("red<No function loaded for player command "..command..">"):send(cn)
   else
     local ret, err = callback(cn, unpack(args))
     if ret == false then
-      messages.warning(cn, "red<" .. err .. ">", true)
+      messages.warning("red<" .. err .. ">"):send(cn)
     end
   end
 end
@@ -132,7 +132,7 @@ end
 function command.load_player_command_scripts()
   for _, load_dir in pairs(PLAYER_COMMAND_SCRIPT_DIRECTORIES) do
     local dir_filename = load_dir["path"]
-    local need_admin = _if(not load_dir["admin"], 1, 2)
+    local need_admin = (not load_dir["admin"]) and 1 or 2
     PLAYER_VALID_COMMANDS[need_admin] = {}
 
     for file_type, filename in filesystem.dir(dir_filename) do

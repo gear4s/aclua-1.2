@@ -20,13 +20,13 @@ local muted = {}
 function server.mute(cn, tcn, reason)
   table.insert(muted, getip(tcn))
 
-  local msg = string.format("blue<You have been> red<muted> blue<by> orange<name<%s>>", cn)
+  local msg = "blue<You have been> red<muted> blue<by> orange<name<%s>>"
 
   if reason ~= "" then
-     msg = msg .. string.format(" blue<- Reason:> yellow<%s>", reason)
+     msg = msg .. " blue<- Reason:> yellow<%s>"
   end
 
-  messages.notice(tcn, msg, true)
+  messages.notice(msg):format(cn, reason):send(tcn)
 end
 
 --[[
@@ -42,7 +42,7 @@ end
 function server.unmute(cn)
   table.itemremove(muted, getip(cn))
 
-  messages.notice(cn, "blue<You have been> green<unmuted>blue<.>", true)
+  messages.notice("blue<You have been> green<unmuted>blue<.>"):send(cn)
 end
 
 --[[
@@ -92,14 +92,14 @@ end
 ]]
 function block_text(cn, text)
   if server.is_muted(cn) then
-    messages.warning(cn, "red<Your chat messages are being blocked.>", true)
+    messages.warning("red<Your chat messages are being blocked.>"
     return true
   else -- Check for mute triggers in their message
     text = string.lower(translate_number_letters(text))
 
     for _, trigger in pairs(mute_words) do
       if text:match(trigger) then
-        messages.warning(cn, "red<Your chat messages are being blocked due to offensive language.>", true)
+        messages.warning("red<Your chat messages are being blocked due to offensive language.>"):send(cn)
         table.insert(muted, getip(cn))
         return true
       end

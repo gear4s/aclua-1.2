@@ -8,7 +8,7 @@ return function(cn, tcn, btime, ...)
       msg = msg .. string.format(" blue<- Reason:> yellow<%s>", table.concat({...}, " "))
     end
 
-    messages.notice(-1, msg)
+    messages.notice(msg):send()
   else
     return false, err
   end
