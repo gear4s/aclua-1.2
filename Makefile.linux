@@ -28,7 +28,8 @@ OBJECTS = $(DSTDIR)/crypto.o \
           $(DSTDIR)/wizard.o \
           $(DSTDIR)/lua.o \
           $(DSTDIR)/lua_tmr_library.o \
-          $(DSTDIR)/lua_cfg_library.o
+          $(DSTDIR)/lua_cfg_library.o \
+          $(DSTDIR)/module.o
 
 GEO_OBJECTS = $(DSTDIR)/GeoIP.o \
               $(DSTDIR)/GeoIPCity.o
