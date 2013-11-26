@@ -9,8 +9,10 @@ include("ac_server")  -- load base2 for framework
 geoip.load_geoip_database("lua/extra/geoip.dat")
 
 -- load framework
-server.fileload("kickban")
 server.fileload("config")
+server.fileload("event_handlers")
+server.fileload("kickban")
 server.fileload("mute_handler")
 server.fileload("commands")
-server.fileload("event_handlers")
+server.fileload("tklimit")
+server.fileload("banner")

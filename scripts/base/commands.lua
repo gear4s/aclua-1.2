@@ -144,3 +144,47 @@ function command.load_player_command_scripts()
     end
   end
 end
+
+events.startup(function()
+  command.load_player_command_scripts()
+end)
+
+events.playertext(function(cn, text)
+  local m = block_text(cn, text)
+  if m then
+    return PLUGIN_BLOCK
+  end
+
+  parts = split(text, " ")
+
+  if string.sub(parts[1], 1, 1) == "!" then
+    local cmd, args = string.gsub(parts[1], "!", "", 1), string.slice(parts, 2)
+
+    if cmd == "cmds" then
+      messages.notice(cn, "blue<List of commands:>", true)
+      messages.notice("yellow<%s>"):format(command.cmdlist_format(1, " - ")):send(cn)
+      if isadmin(cn) then
+        messages.notice("red<%s>"):format(command.cmdlist_format(2, " - ")):send(cn)
+      end
+    elseif command.is_valid_command(1, cmd) then
+      if table.contains(enabled_commands, cmd) then
+        command.load_player_command_script(1, cmd, args, cn)
+      else
+        messages.notice("red<Command disabled>"):send(cn)
+      end
+    elseif command.is_valid_command(2, cmd) then
+      if not isadmin(cn) then
+        messages.notice("red<Permission denied>"):send(cn)
+      else
+        if table.contains(enabled_commands, cmd) then
+          command.load_player_command_script(2, cmd, args, cn)
+        else
+          messages.notice("red<Command disabled>"):send(cn)
+        end
+      end
+    else
+      messages.warning("red<Invalid command>"):send(cn)
+    end
+    return PLUGIN_BLOCK
+  end
+end)
