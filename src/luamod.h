@@ -13,6 +13,7 @@ extern "C" {
 #include "lua_generators.h"
 #include "lua_tmr_library.h"
 #include "lua_cfg_library.h"
+#include "module.hpp"
 
 #define LUA_FUNCTION_PREFIX(prefix, function) int prefix##function (lua_State *L)
 #define LUA_FUNCTION(function) LUA_FUNCTION_PREFIX(__, function)

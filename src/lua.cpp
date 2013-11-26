@@ -8,7 +8,6 @@ extern "C" {
   #include "lanes/src/threading.h"
 }
 
-#include "module.hpp"
 #include "luamod.h"
 #include "lua_functions.h"
 
@@ -18,6 +17,14 @@ extern "C" {
 #include <dirent.h> /// http://softagalleria.net/dirent.php
 #include <string>
 #include <signal.h>
+
+namespace lua {
+  namespace module {
+    void openAll(lua_State * L) {
+      lua::module::open_geoip(L); lua::module::open_filesystem(L);
+    }
+  }
+}
 
 #define ALL_SCRIPTS for ( int _i = 0; _i < Lua::numberOfScripts; _i++ )
 #define SCRIPT Lua::scripts[_i]
@@ -1269,7 +1276,6 @@ LUA_FUNCTION(setname) {
   int target_cn = (int) lua_tonumber(L, 1);
   if(!valid_client(target_cn)) return 0;
   copystring(clients[target_cn]->name, lua_tostring(L, 2));
-  //sendinitclient( *clients[target_cn] );
   as_player(target_cn, "is", SV_SWITCHNAME, clients[target_cn]->name);
   return 0;
 }

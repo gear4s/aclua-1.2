@@ -2408,7 +2408,7 @@ void changeclientrole(int client, int role, char *pwd, bool force)
 {
     pwddetail pd;
     if(!isdedicated || !valid_client(client)) return;
-    if ( !force && Lua::callHandler( LUA_ON_PLAYER_ROLE_CHANGE_TRY, "iisb", client, role, pwd, clients[client]->connecting ) == Lua::PLUGIN_BLOCK ) return;
+    if ( Lua::callHandler( LUA_ON_PLAYER_ROLE_CHANGE_TRY, "iisb", client, role, pwd, clients[client]->connecting ) == Lua::PLUGIN_BLOCK ) return;
     pd.line = -1;
     int oldrole = clients[client]->role;
     if(force || role == CR_DEFAULT || (role == CR_ADMIN && pwd && pwd[0] && passwords.check(clients[client]->name, pwd, clients[client]->salt, &pd) && !pd.denyadmin))
