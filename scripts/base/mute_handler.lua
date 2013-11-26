@@ -92,7 +92,7 @@ end
 ]]
 function block_text(cn, text)
   if server.is_muted(cn) then
-    messages.warning("red<Your chat messages are being blocked.>"
+    messages.warning("red<Your chat messages are being blocked.>"):send(cn)
     return true
   else -- Check for mute triggers in their message
     text = string.lower(translate_number_letters(text))

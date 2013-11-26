@@ -50,7 +50,7 @@ return function(cn, command)
           end
         end
 
-        messages.notice("blue<Help on the \">yellow<%s>blue<\" command:> green<%s>%s"):format(command, def, cmdpat ~= nil and cmdpat or "")):send(cn)
+        messages.notice("blue<Help on the \">yellow<%s>blue<\" command:> green<%s>%s"):format(command, def, cmdpat ~= nil and cmdpat or ""):send(cn)
       else
         return false, string.format("Administrator privileges is> blue<required> red<to retrieve help on the %s command.", command)
       end

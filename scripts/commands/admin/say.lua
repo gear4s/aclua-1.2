@@ -3,5 +3,5 @@ return function (cn, ...)
     return false, "Need text to send"
   end
 
-  messages.notice(-1, "red<" .. table.concat({...}, " ") .. ">")
+  messages.notice("red<%s>"):format(table.concat({...}, " ")):send()
 end

@@ -1,6 +1,6 @@
 messages = {}
 
-local msgd = {
+msgd = {
   text = "",
   name = "",
   to = "",
