@@ -3,40 +3,23 @@ local innerEvents = {}
 events = {}
 
 local evMethods = {
-  new = function(id)
+  new = function(id, func)
     innerEvents[id] = {}
 
     events[id] = function(innerFunc)
       table.insert(innerEvents[id], innerFunc)
     end
-  end,
 
-  call = function(id, ...)
-    for i,f in ipairs(innerEvents[id]) do
-      f(...)
+    _G[func] = function(...)
+      for i,f in ipairs(innerEvents[id]) do
+        f(...)
+      end
     end
   end
 }
 
-evMethods.new("playertext")
-evMethods.new("playerconnect")
-evMethods.new("playerteamkill")
-evMethods.new("playernamechange")
-evMethods.new("startup")
-
-function onPlayerSayText(...)
-  evMethods.call("playertext", ...)
-end
-function onPlayerConnect(...)
-  evMethods.call("playerconnect", ...)
-end
-function onPlayerTeamKill(...)
-  evMethods.call("playerteamkill", ...)
-end
-function onInit(...)
-  evMethods.call("startup", ...)
-end
-function onPlayerNameChange(...)
-  evMethods.call("playernamechange", ...)
-end
-
+evMethods.new("playertext", "onPlayerSayText")
+evMethods.new("playerconnect", "onPlayerConnect")
+evMethods.new("playerteamkill", "onPlayerTeamKill")
+evMethods.new("playernamechange", "onPlayerNameChange")
+evMethods.new("startup", "onInit")
