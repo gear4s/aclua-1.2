@@ -70,6 +70,8 @@ extern void sendteamtext(char*, int, int);
 extern void sendvoicecomteam(int, int);
 extern void rereadcfgs(bool fromLua = true);
 extern int clienthasflag(int);
+extern void addms( const char *name );
+extern void remms( const char *name );
 
 struct pwddetail {
   string pwd;
@@ -617,6 +619,11 @@ void Lua::registerGlobals(lua_State *L) {
   LUA_SET_FUNCTION(getvote);
   LUA_SET_FUNCTION(getpushfactor);
   LUA_SET_FUNCTION(genpwdhash);
+  LUA_SET_FUNCTION(addms);
+  LUA_SET_FUNCTION(updatems);
+  LUA_SET_FUNCTION(getmasterserver);
+  LUA_SET_FUNCTION(getmasterservers);
+  LUA_SET_FUNCTION(removems);
   LUA_SET_FUNCTION(getacversion);
   LUA_SET_FUNCTION(getacbuildtype);
   LUA_SET_FUNCTION(getconnectmillis);
@@ -2718,6 +2725,48 @@ LUA_FUNCTION(genpwdhash) {
   int session_id = (int) lua_tonumber(L, 3);
   lua_pushstring(L, genpwdhash(player_name, password, session_id));
   return 1;
+}
+
+LUA_FUNCTION (addms)
+{
+  lua_checkstack( L, 1 );
+  if ( !lua_isstring( L, 1 ) ) return 0;
+  const char *name = lua_tostring( L, 1 );
+  addms( name );
+  servermsinit( masterservers - 1, name, scl.ip, CUBE_SERVINFO_PORT( scl.serverport ), true );
+  return 0;
+}
+
+LUA_FUNCTION (updatems)
+{
+  loopi( masterservers ) updatemasterserver( i, servmillis, serverhost->address.port, true );
+  return 0;
+}
+
+LUA_FUNCTION (getmasterserver)
+{
+  lua_pushstring( L, scl.master );
+  return 1;
+}
+
+LUA_FUNCTION (getmasterservers)
+{
+  lua_newtable( L );
+  loopi( masterservers )
+  {
+    lua_pushinteger( L, i + 1 );
+    lua_pushstring( L, mastername[i].c_str() );
+    lua_settable( L, 1 );
+  }
+  return 1;
+}
+
+LUA_FUNCTION (removems)
+{
+  lua_checkstack( L, 1 );
+  if ( !lua_isstring( L, 1 ) ) return 0;
+  remms( lua_tostring( L, 1 ) );
+  return 0;
 }
 
 LUA_FUNCTION(getacversion) {

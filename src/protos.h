@@ -874,14 +874,15 @@ extern void trimtrailingwhitespace(char *s);
 extern void cutcolorstring(char *text, int len);
 extern void startintermission();
 extern void restoreserverstate(vector<entity> &ents);
-extern string mastername;
-extern int masterport, mastertype;
-extern ENetSocket connectmaster();
+#include <string>
+extern vector<std::string> mastername;
+extern vector<int> masterport, mastertype;
+extern ENetSocket connectmaster(int m);
 extern uchar *retrieveservers(uchar *buf, int buflen);
-extern void serverms(int mode, int numplayers, int minremain, char *smapname, int millis, const ENetAddress &localaddr, int *mnum, int *msend, int *mrec, int *cnum, int *csend, int *crec, int protocol_version);
+extern void serverms(int m, int mode, int numplayers, int minremain, char *smapname, int millis, const ENetAddress &localaddr, int *mnum, int *msend, int *mrec, int *cnum, int *csend, int *crec, int protocol_version);
 extern int msgsizelookup(int msg);
 extern const char *genpwdhash(const char *name, const char *pwd, int salt);
-extern void servermsinit(const char *master, const char *ip, int serverport, bool listen);
+extern void servermsinit(int m, const char *master, const char *ip, int serverport, bool listen);
 extern bool serverpickup(int i, int sender);
 extern bool valid_client(int cn);
 extern void extinfo_cnbuf(ucharbuf &p, int cn);
@@ -962,32 +963,6 @@ struct servercommandline
         // client: dtwhzbsave
         switch(arg[1])
         { // todo: gjlqGHJQUYZ
-            case '-':
-                    if(!strncmp(arg, "--demofilenameformat=", 21))
-                    {
-                        demofilenameformat = arg+21;
-                    }
-                    else if(!strncmp(arg, "--demotimestampformat=", 22))
-                    {
-                        demotimestampformat = arg+22;
-                    }
-                    else if(!strncmp(arg, "--demotimelocal=", 16))
-                    {
-                        int ai = atoi(arg+16);
-                        demotimelocal = ai == 0 ? 0 : 1;
-                    }
-                    else if(!strncmp(arg, "--masterport=", 13))
-                    {
-                        int ai = atoi(arg+13);
-                        masterport = ai == 0 ? AC_MASTER_PORT : ai;
-                    }
-                    else if(!strncmp(arg, "--mastertype=", 13))
-                    {
-                        int ai = atoi(arg+13);
-                        mastertype = ai > 0 ? 1 : 0;
-                    }
-                    else return false;
-                    break;
             case 'u': uprate = ai; break;
             case 'f': if(ai > 0 && ai < 65536) serverport = ai; break;
             case 'i': ip     = a; break;

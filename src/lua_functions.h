@@ -114,6 +114,11 @@ static LUA_FUNCTION (getwholemaprot); // ()
 static LUA_FUNCTION (setwholemaprot); // (table maprot)
 static LUA_FUNCTION (getwholebl); // ()
 static LUA_FUNCTION (setwholebl); // (table blacklist)
+static LUA_FUNCTION (getmasterserver); // ()
+static LUA_FUNCTION (getmasterservers); // ()
+static LUA_FUNCTION (addms); // (string host)
+static LUA_FUNCTION (updatems); // ()
+static LUA_FUNCTION (removems); // (string host)
 static LUA_FUNCTION (rereadcfgs); // ()
 //END server config
 

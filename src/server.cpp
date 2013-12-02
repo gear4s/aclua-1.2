@@ -2528,7 +2528,7 @@ uint nextauthreq = 0;
 
 void tryauth(client *cl, const char *user)
 {
-    extern bool requestmasterf(const char *fmt, ...);
+    extern bool requestmasterf(int m, const char *fmt, ...);
     if(!nextauthreq) nextauthreq = 1;
     cl->authreq = nextauthreq++;
     filtertext(cl->authname, user, false, 100);
@@ -2542,7 +2542,7 @@ void tryauth(client *cl, const char *user)
 void answerchallenge(client *cl, uint id, char *val)
 {
     if(cl->authreq != id) return;
-    extern bool requestmasterf(const char *fmt, ...);
+    extern bool requestmasterf(int m, const char *fmt, ...);
     for(char *s = val; *s; s++)
     {
         if(!isxdigit(*s)) { *s = '\0'; break; }
@@ -4166,7 +4166,8 @@ void serverslice(uint timeout)   // main server update, called from cube main lo
 
     if(!isdedicated) return;     // below is network only
 
-    serverms(smode, numclients(), minremain, smapname, servmillis, serverhost->address, &mnum, &msend, &mrec, &cnum, &csend, &crec, SERVER_PROTOCOL_VERSION);
+    extern int masterservers;
+    loopi( masterservers ) serverms(i, smode, numclients(), minremain, smapname, servmillis, serverhost->address, &mnum, &msend, &mrec, &cnum, &csend, &crec, SERVER_PROTOCOL_VERSION);
 
     if(autoteam && m_teammode && !m_arena && !interm && servmillis - lastfillup > 5000 && refillteams()) lastfillup = servmillis;
 
@@ -4487,7 +4488,8 @@ void initserver(bool dedicated, int argc, char **argv)
     if ( hitreg_fixed ) logline( ACLOG_INFO, "Hitreg-fix enabled" );
     else logline( ACLOG_INFO, "Hitreg-fix disabled" );
 
-    servermsinit(scl.master ? scl.master : AC_MASTER_URI, scl.ip, CUBE_SERVINFO_PORT(scl.serverport), dedicated);
+    extern int masterservers;
+    servermsinit(masterservers-1, scl.master ? scl.master : AC_MASTER_URI, scl.ip, CUBE_SERVINFO_PORT(scl.serverport), dedicated);
 
     if((isdedicated = dedicated))
     {

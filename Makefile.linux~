@@ -1,0 +1,65 @@
+CXX = g++
+DEFINES = -DSTANDALONE
+OBJECT_FLAGS = -O2 -Wall
+DSTDIR = linux_release
+SRCDIR = src
+INCLUDES = -Ienet/include -Iadditions/geoip -Isrc/lua/include
+LIBS = -Lenet/.libs -lenet -lz -Lsrc/lua -lluajitlin -ldl -lpthread
+LANES_SRCDIR = src/lanes/src
+LANES_DEFINES = -D_GNU_SOURCE -DNDEBUG
+LANES_OBJECT_FLAGS = $(OBJECT_FLAGS)
+LANES_INCLUDES = -Isrc/lua/include
+
+
+MACHINE := $(shell uname -m)
+ifeq ($(MACHINE), x86_64)
+	TARGET = $(DSTDIR)/linux_64_server
+else
+	TARGET = $(DSTDIR)/linux_server
+endif
+
+OBJECTS = $(DSTDIR)/crypto.o \
+          $(DSTDIR)/log.o \
+          $(DSTDIR)/protocol.o \
+          $(DSTDIR)/serverms.o \
+          $(DSTDIR)/server.o \
+          $(DSTDIR)/stream.o \
+          $(DSTDIR)/tools.o \
+          $(DSTDIR)/wizard.o \
+          $(DSTDIR)/lua.o \
+          $(DSTDIR)/lua_tmr_library.o \
+          $(DSTDIR)/lua_cfg_library.o
+
+GEO_OBJECTS = $(DSTDIR)/GeoIP.o \
+              $(DSTDIR)/GeoIPCity.o
+
+MODULE_OBJECTS = $(DSTDIR)/geoip.o \
+                 $(DSTDIR)/filesystem.o 
+
+LANES_OBJECTS = $(DSTDIR)/lanes_lanes.o \
+          $(DSTDIR)/threading_lanes.o \
+          $(DSTDIR)/keeper_lanes.o \
+          $(DSTDIR)/tools_lanes.o
+
+all: make_DSTDIR $(TARGET)
+
+$(LANES_OBJECTS):
+	$(CXX) -c $(LANES_OBJECT_FLAGS) $(LANES_DEFINES) $(LANES_INCLUDES) -o $@ $(LANES_SRCDIR)/$(@F:_lanes.o=.cpp)
+
+$(OBJECTS):
+	$(CXX) -c $(OBJECT_FLAGS) $(DEFINES) $(INCLUDES) -o $@ $(SRCDIR)/$(@F:.o=.cpp)
+
+$(MODULE_OBJECTS):
+	$(CXX) -c $(OBJECT_FLAGS) $(DEFINES) $(INCLUDES) -o $@ $(SRCDIR)/modules/$(@F:.o=.cpp)
+
+$(GEO_OBJECTS):
+	gcc -DGEOIPDATADIR -c $(OBJECT_FLAGS) $(DEFINES) $(INCLUDES) -o $@ additions/geoip/$(@F:.o=.c)
+
+$(TARGET): $(GEO_OBJECTS) $(MODULE_OBJECTS) $(OBJECTS) $(LANES_OBJECTS)
+	$(CXX) -o $(TARGET) $(OBJECTS) $(LANES_OBJECTS) $(MODULE_OBJECTS) $(GEO_OBJECTS) $(LIBS) -Wl,-rpath,.
+
+make_DSTDIR:
+	mkdir -p $(DSTDIR)
+
+clean:
+	rm -f $(OBJECTS) $(LANES_OBJECTS) $(TARGET) $(MODULE_OBJECTS) $(GEO_OBJECTS)

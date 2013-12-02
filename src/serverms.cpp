@@ -2,6 +2,7 @@
 
 #include "cube.h"
 #include "luamod.h"
+#include <string>
 
 #ifdef STANDALONE
 bool resolverwait(const char *name, ENetAddress *address)
@@ -17,42 +18,81 @@ int connectwithtimeout(ENetSocket sock, const char *hostname, ENetAddress &remot
 }
 #endif
 
-ENetSocket mastersock = ENET_SOCKET_NULL;
-ENetAddress masteraddress = { ENET_HOST_ANY, ENET_PORT_ANY }, serveraddress = { ENET_HOST_ANY, ENET_PORT_ANY };
-string mastername = AC_MASTER_URI;
-int masterport = AC_MASTER_PORT, mastertype = AC_MASTER_HTTP;
-int lastupdatemaster = 0;
-vector<char> masterout, masterin;
-int masteroutpos = 0, masterinpos = 0;
+int masterservers = 0;
+ENetAddress serveraddress = { ENET_HOST_ANY, ENET_PORT_ANY };
 
-void disconnectmaster()
-{
-    if(mastersock == ENET_SOCKET_NULL) return;
+vector<ENetSocket> mastersock;
+vector<ENetAddress> masteraddress;
 
-    enet_socket_destroy(mastersock);
-    mastersock = ENET_SOCKET_NULL;
+vector<std::string> mastername;
+vector<int> masterport, mastertype;
+//int masterport = AC_MASTER_PORT, mastertype = AC_MASTER_HTTP;
+vector<int> lastupdatemaster;
+vector<vector<char> > masterout, masterin;
+vector<int> masteroutpos, masterinpos;
 
-    masterout.setsize(0);
-    masterin.setsize(0);
-    masteroutpos = masterinpos = 0;
+void addms(const char *name) {
+  ENetSocket socket = ENET_SOCKET_NULL;
+  mastersock.add(socket);
+  ENetAddress addr = { ENET_HOST_ANY, ENET_PORT_ANY };
+  masteraddress.add(addr);
+  mastername.add(name);
+  lastupdatemaster.add(0);
+  masteroutpos.add(0);
+  masterinpos.add(0);
+  masterout.add();
+  masterin.add();
+  masterservers++;
+}
 
-    masteraddress.host = ENET_HOST_ANY;
-    masteraddress.port = ENET_PORT_ANY;
+void disconnectmaster(int m);
+void remms(const char *name) {
+  loopv(mastername) {
+    if(i == 0) continue; // main master server can't be removed
+
+    if(mastername[i] == name) {
+      masterservers--;
+      disconnectmaster(i);
+      mastersock.remove(i);
+      masteraddress.remove(i);
+      mastername.remove(i);
+      lastupdatemaster.remove(i);
+      masteroutpos.remove(i);
+      masterinpos.remove(i);
+      masterout.remove(i);
+      masterin.remove(i);
+      break;
+    }
+  }
+}
+
+void disconnectmaster(int m) {
+    if(mastersock[m] == ENET_SOCKET_NULL) return;
+
+    enet_socket_destroy(mastersock[m]);
+    mastersock[m] = ENET_SOCKET_NULL;
+
+    masterout[m].setsize(0);
+    masterin[m].setsize(0);
+    masteroutpos[m] = masterinpos[m] = 0;
+
+    masteraddress[m].host = ENET_HOST_ANY;
+    masteraddress[m].port = ENET_PORT_ANY;
 
     //lastupdatemaster = 0;
 }
 
-ENetSocket connectmaster()
+ENetSocket connectmaster(int m)
 {
-    if(!mastername[0]) return ENET_SOCKET_NULL;
+    if(!mastername[m][0]) return ENET_SOCKET_NULL;
     extern servercommandline scl;
     if(scl.maxclients>MAXCL) { logline(ACLOG_WARNING, "maxclient exceeded: cannot register"); return ENET_SOCKET_NULL; }
 
-    if(masteraddress.host == ENET_HOST_ANY)
+    if(masteraddress[m].host == ENET_HOST_ANY)
     {
-        logline(ACLOG_INFO, "looking up %s:%d...", mastername, masterport);
-        masteraddress.port = masterport;
-        if(!resolverwait(mastername, &masteraddress)) return ENET_SOCKET_NULL;
+        logline(ACLOG_INFO, "looking up %s:%d...", mastername[m].c_str(), masterport[m]);
+        masteraddress[m].port = masterport[m];
+        if(!resolverwait(mastername[m].c_str(), &masteraddress[m])) return ENET_SOCKET_NULL;
     }
     ENetSocket sock = enet_socket_create(ENET_SOCKET_TYPE_STREAM);
     if(sock != ENET_SOCKET_NULL && serveraddress.host != ENET_HOST_ANY && enet_socket_bind(sock, &serveraddress) < 0)
@@ -60,7 +100,7 @@ ENetSocket connectmaster()
         enet_socket_destroy(sock);
         sock = ENET_SOCKET_NULL;
     }
-    if(sock == ENET_SOCKET_NULL || connectwithtimeout(sock, mastername, masteraddress) < 0)
+    if(sock == ENET_SOCKET_NULL || connectwithtimeout(sock, mastername[m].c_str(), masteraddress[m]) < 0)
     {
         logline(ACLOG_WARNING, sock==ENET_SOCKET_NULL ? "could not open socket" : "could not connect");
         return ENET_SOCKET_NULL;
@@ -70,31 +110,31 @@ ENetSocket connectmaster()
     return sock;
 }
 
-bool requestmaster(const char *req)
+bool requestmaster(int m, const char *req)
 {
-    if(mastersock == ENET_SOCKET_NULL)
+    if(mastersock[m] == ENET_SOCKET_NULL)
     {
-        mastersock = connectmaster();
-        if(mastersock == ENET_SOCKET_NULL) return false;
+        mastersock[m] = connectmaster(m);
+        if(mastersock[m] == ENET_SOCKET_NULL) return false;
     }
 
-    masterout.put(req, strlen(req));
+    masterout[m].put(req, strlen(req));
     return true;
 }
 
-bool requestmasterf(const char *fmt, ...)
+bool requestmasterf(int m, const char *fmt, ...)
 {
     defvformatstring(req, fmt, fmt);
-    return requestmaster(req);
+    return requestmaster(m, req);
 }
 
 extern void processmasterinput(const char *cmd, int cmdlen, const char *args);
 
-void processmasterinput()
+void processmasterinput(int m)
 {
-    if(masterinpos >= masterin.length()) return;
+    if(masterinpos[m] >= masterin.length()) return;
 
-    char *input = &masterin[masterinpos], *end = (char *)memchr(input, '\n', masterin.length() - masterinpos);
+    char *input = &masterin[m][masterinpos[m]], *end = (char *)memchr(input, '\n', masterin[m].length() - masterinpos[m]);
     while(end)
     {
         *end++ = '\0';
@@ -105,63 +145,63 @@ void processmasterinput()
         while(args < end && isspace(*args)) args++;
 
         if(!strncmp(input, "failreg", cmdlen))
-            logline(ACLOG_WARNING, "master server registration failed: %s", args);
+            logline(ACLOG_WARNING, "[%s] master server registration failed: %s", mastername[m].c_str(), args);
         else if(!strncmp(input, "succreg", cmdlen))
         {
-            logline(ACLOG_INFO, "master server registration succeeded");
+            logline(ACLOG_INFO, "[%s] master server registration succeeded", mastername[m].c_str());
         } else {
             Lua::callHandler( LUA_ON_MASTER_SERVER_COMMAND, "s", input );
             processmasterinput(input, cmdlen, args);
             Lua::callHandler( LUA_ON_MASTER_SERVER_COMMAND_AFTER, "s", input );
         }
 
-        masterinpos = end - masterin.getbuf();
+        masterinpos[m] = end - masterin[m].getbuf();
         input = end;
-        end = (char *)memchr(input, '\n', masterin.length() - masterinpos);
+        end = (char *)memchr(input, '\n', masterin[m].length() - masterinpos[m]);
     }
 
-    if(masterinpos >= masterin.length())
+    if(masterinpos[m] >= masterin[m].length())
     {
-        masterin.setsize(0);
-        masterinpos = 0;
+        masterin[m].setsize(0);
+        masterinpos[m] = 0;
     }
 }
 
-void flushmasteroutput()
+void flushmasteroutput(int m)
 {
-    if(masterout.empty()) return;
+    if(masterout[m].empty()) return;
 
     ENetBuffer buf;
-    buf.data = &masterout[masteroutpos];
-    buf.dataLength = masterout.length() - masteroutpos;
-    int sent = enet_socket_send(mastersock, NULL, &buf, 1);
+    buf.data = &masterout[m][masteroutpos[m]];
+    buf.dataLength = masterout[m].length() - masteroutpos[m];
+    int sent = enet_socket_send(mastersock[m], NULL, &buf, 1);
     if(sent >= 0)
     {
-        masteroutpos += sent;
-        if(masteroutpos >= masterout.length())
+        masteroutpos[m] += sent;
+        if(masteroutpos[m] >= masterout[m].length())
         {
-            masterout.setsize(0);
-            masteroutpos = 0;
+            masterout[m].setsize(0);
+            masteroutpos[m] = 0;
         }
     }
-    else disconnectmaster();
+    else disconnectmaster(m);
 }
 
-void flushmasterinput()
+void flushmasterinput(int m)
 {
-    if(masterin.length() >= masterin.capacity())
-        masterin.reserve(4096);
+    if(masterin[m].length() >= masterin[m].capacity())
+        masterin[m].reserve(4096);
 
     ENetBuffer buf;
-    buf.data = &masterin[masterin.length()];
-    buf.dataLength = masterin.capacity() - masterin.length();
-    int recv = enet_socket_receive(mastersock, NULL, &buf, 1);
+    buf.data = &masterin[m][masterin[m].length()];
+    buf.dataLength = masterin[m].capacity() - masterin[m].length();
+    int recv = enet_socket_receive(mastersock[m], NULL, &buf, 1);
     if(recv > 0)
     {
-        masterin.advance(recv);
-        processmasterinput();
+        masterin[m].advance(recv);
+        processmasterinput(m);
     }
-    else disconnectmaster();
+    else disconnectmaster(m);
 }
 
 extern char *global_name;
@@ -170,33 +210,33 @@ extern int totalclients;
 
 // send alive signal to masterserver after 40 minutes of uptime and if currently in intermission (so theoretically <= 1 hour)
 // TODO?: implement a thread to drop this "only in intermission" business, we'll need it once AUTH gets active!
-static inline void updatemasterserver(int millis, int port, bool fromLua = false)
+void updatemasterserver(int m, int millis, int port, bool fromLua = false)
 {
-    if(fromLua  || (!lastupdatemaster || ((millis-lastupdatemaster)>40*60*1000 && (interm || !totalclients))))
+    if(fromLua  || (!lastupdatemaster[m] || ((millis-lastupdatemaster[m])>40*60*1000 && (interm || !totalclients))))
     {
         char servername[30]; memset(servername,'\0',30); filtertext(servername,global_name,-1,20);
-        if(mastername[0]) requestmasterf("regserv %d %s %d\n", port, servername[0] ? servername : "noname", AC_VERSION);
-        lastupdatemaster = millis + 1;
-        if ( !fromLua ) Lua::callHandler( LUA_ON_MASTER_SERVER_UPDATE, "" );
+        if(mastername[m][0]) requestmasterf(m, "regserv %d %s %d\n", port, servername[0] ? servername : "noname", AC_VERSION);
+        lastupdatemaster[m] = millis + 1;
+        if ( !fromLua ) Lua::callHandler( LUA_ON_MASTER_SERVER_UPDATE, "s", mastername[m].c_str() );
     }
 }
 
 ENetSocket pongsock = ENET_SOCKET_NULL, lansock = ENET_SOCKET_NULL;
 extern int getpongflags(enet_uint32 ip);
 
-void serverms(int mode, int numplayers, int minremain, char *smapname, int millis, const ENetAddress &localaddr, int *mnum, int *msend, int *mrec, int *cnum, int *csend, int *crec, int protocol_version)
+void serverms(int m, int mode, int numplayers, int minremain, char *smapname, int millis, const ENetAddress &localaddr, int *mnum, int *msend, int *mrec, int *cnum, int *csend, int *crec, int protocol_version)
 {
-    flushmasteroutput();
-    updatemasterserver(millis, localaddr.port);
+    flushmasteroutput(m);
+    updatemasterserver(m, millis, localaddr.port);
 
     static ENetSocketSet sockset;
     ENET_SOCKETSET_EMPTY(sockset);
     ENetSocket maxsock = pongsock;
     ENET_SOCKETSET_ADD(sockset, pongsock);
-    if(mastersock != ENET_SOCKET_NULL)
+    if(mastersock[m] != ENET_SOCKET_NULL)
     {
-        maxsock = max(maxsock, mastersock);
-        ENET_SOCKETSET_ADD(sockset, mastersock);
+        maxsock = max(maxsock, mastersock[m]);
+        ENET_SOCKETSET_ADD(sockset, mastersock[m]);
     }
     if(lansock != ENET_SOCKET_NULL)
     {
@@ -337,14 +377,16 @@ void serverms(int mode, int numplayers, int minremain, char *smapname, int milli
         else *csend += (int)buf.dataLength;
     }
 
-    if(mastersock != ENET_SOCKET_NULL && ENET_SOCKETSET_CHECK(sockset, mastersock)) flushmasterinput();
+    if(mastersock[m] != ENET_SOCKET_NULL && ENET_SOCKETSET_CHECK(sockset, mastersock[m])) flushmasterinput(m);
 }
 
 // this function should be made better, because it is used just ONCE (no need of so much parameters)
-void servermsinit(const char *master, const char *ip, int infoport, bool listen)
+void servermsinit(int m, const char *master, const char *ip, int infoport, bool listen)
 {
-    copystring(mastername, master);
-    disconnectmaster();
+    mastername[m] = master;
+    disconnectmaster(m);
+
+    if(m != 0) return;
 
     if(listen)
     {
