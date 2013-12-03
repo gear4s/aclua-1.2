@@ -1,10 +1,10 @@
 -- Keep these messages at the top of the file so users can find them easily
 local killingspree_message = {
-  ["5"]  = "yellow<name<%s>> is on a orange<KILLING SPREE>!!",
-  ["10"] = "yellow<name<%s>> is on a orange<RAMPAGE>!!",
-  ["15"] = "yellow<name<%s>> is orange<DOMINATING>!!",
-  ["20"] = "yellow<name<%s>> is orange<UNSTOPPABLE>!!",
-  ["30"] = "yellow<name<%s>> is orange<GODLIKE>!!"
+  [5]  = "yellow<name<%s>> is on a orange<KILLING SPREE>!!",
+  [10] = "yellow<name<%s>> is on a orange<RAMPAGE>!!",
+  [15] = "yellow<name<%s>> is orange<DOMINATING>!!",
+  [20] = "yellow<name<%s>> is orange<UNSTOPPABLE>!!",
+  [30] = "yellow<name<%s>> is orange<GODLIKE>!!"
 }
 
 local broadcast_minimum = 10 -- minimum amount of gibs to message publically
@@ -54,7 +54,7 @@ end)
 events.intermission(function()
     first_frag = true
 
-    for player in server.players() do
+    for player in ipairs(server.players()) do
         players[player] = 0
     end
 end)
