@@ -1,4 +1,4 @@
-CXX = g++
+CXX = g++ -Wl,-export-dynamic
 DEFINES = -DSTANDALONE
 OBJECT_FLAGS = -O2 -Wall
 DSTDIR = win32_release
