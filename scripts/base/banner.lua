@@ -5,7 +5,7 @@ local function sendMOTD(cn)
 end
 
 events.playerconnect(function(cn)
-  messages.notice("yellow<name<%s>> blue<has connected from> red<%s>"):format(cn, server.player_country(cn)):send(cn)
+  messages.notice("yellow<name<%s>> blue<has connected from> red<%s>"):format(cn, server.player_country(cn)):send()
 
   sendMOTD(cn)
 end)
