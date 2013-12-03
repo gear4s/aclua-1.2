@@ -883,6 +883,8 @@ extern void serverms(int m, int mode, int numplayers, int minremain, char *smapn
 extern int msgsizelookup(int msg);
 extern const char *genpwdhash(const char *name, const char *pwd, int salt);
 extern void servermsinit(int m, const char *master, const char *ip, int serverport, bool listen);
+extern void addms( const char *name );
+extern void remms( const char *name );
 extern bool serverpickup(int i, int sender);
 extern bool valid_client(int cn);
 extern void extinfo_cnbuf(ucharbuf &p, int cn);

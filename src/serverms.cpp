@@ -90,8 +90,8 @@ ENetSocket connectmaster(int m)
 
     if(masteraddress[m].host == ENET_HOST_ANY)
     {
-        logline(ACLOG_INFO, "looking up %s:%d...", mastername[m].c_str(), masterport[m]);
-        masteraddress[m].port = masterport[m];
+        logline(ACLOG_INFO, "looking up %s...", mastername[m].c_str());
+        masteraddress[m].port = AC_MASTER_PORT;
         if(!resolverwait(mastername[m].c_str(), &masteraddress[m])) return ENET_SOCKET_NULL;
     }
     ENetSocket sock = enet_socket_create(ENET_SOCKET_TYPE_STREAM);

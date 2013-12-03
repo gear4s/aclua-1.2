@@ -4488,6 +4488,7 @@ void initserver(bool dedicated, int argc, char **argv)
     if ( hitreg_fixed ) logline( ACLOG_INFO, "Hitreg-fix enabled" );
     else logline( ACLOG_INFO, "Hitreg-fix disabled" );
 
+    addms( AC_MASTER_URI );
     extern int masterservers;
     servermsinit(masterservers-1, scl.master ? scl.master : AC_MASTER_URI, scl.ip, CUBE_SERVINFO_PORT(scl.serverport), dedicated);
 
