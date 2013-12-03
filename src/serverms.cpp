@@ -31,12 +31,13 @@ vector<int> lastupdatemaster;
 vector<vector<char> > masterout, masterin;
 vector<int> masteroutpos, masterinpos;
 
-void addms(const char *name) {
+void addms(const char *name, int port) {
   ENetSocket socket = ENET_SOCKET_NULL;
   mastersock.add(socket);
   ENetAddress addr = { ENET_HOST_ANY, ENET_PORT_ANY };
   masteraddress.add(addr);
   mastername.add(name);
+  masterport.add(port);
   lastupdatemaster.add(0);
   masteroutpos.add(0);
   masterinpos.add(0);
@@ -56,6 +57,7 @@ void remms(const char *name) {
       mastersock.remove(i);
       masteraddress.remove(i);
       mastername.remove(i);
+      masterport.remove(i);
       lastupdatemaster.remove(i);
       masteroutpos.remove(i);
       masterinpos.remove(i);
@@ -90,8 +92,8 @@ ENetSocket connectmaster(int m)
 
     if(masteraddress[m].host == ENET_HOST_ANY)
     {
-        logline(ACLOG_INFO, "looking up %s...", mastername[m].c_str());
-        masteraddress[m].port = AC_MASTER_PORT;
+        logline(ACLOG_INFO, "looking up %s:%d...", mastername[m].c_str(), masterport[m]);
+        masteraddress[m].port = masterport[m];
         if(!resolverwait(mastername[m].c_str(), &masteraddress[m])) return ENET_SOCKET_NULL;
     }
     ENetSocket sock = enet_socket_create(ENET_SOCKET_TYPE_STREAM);

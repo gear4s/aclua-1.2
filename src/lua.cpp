@@ -70,7 +70,7 @@ extern void sendteamtext(char*, int, int);
 extern void sendvoicecomteam(int, int);
 extern void rereadcfgs(bool fromLua = true);
 extern int clienthasflag(int);
-extern void addms( const char *name );
+extern void addms( const char *name, int port );
 extern void remms( const char *name );
 
 struct pwddetail {
@@ -2732,7 +2732,8 @@ LUA_FUNCTION (addms)
   lua_checkstack( L, 1 );
   if ( !lua_isstring( L, 1 ) ) return 0;
   const char *name = lua_tostring( L, 1 );
-  addms( name );
+  int port = lua_isnumber( L, 2 ) ? lua_tonumber( L, 2 ) : AC_MASTER_PORT;
+  addms( name, port );
   servermsinit( masterservers - 1, name, scl.ip, CUBE_SERVINFO_PORT( scl.serverport ), true );
   return 0;
 }
