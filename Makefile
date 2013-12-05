@@ -5,10 +5,11 @@ libenet: enet/Makefile
 	-$(MAKE) -C enet all
 
 mingw:
-	cd src\\lua && $(MAKE) mingw
+	cd src/lua && $(MAKE) mingw
 	$(MAKE) -f Makefile.mingw
 
 linux: libenet
+	cd src/lua && $(MAKE)
 	$(MAKE) -f Makefile.linux
 
 linux-clean:
@@ -20,4 +21,7 @@ mingw-clean:
 libenet-clean: enet/Makefile
 	$(MAKE) -C enet clean
 
-clean: libenet-clean linux-clean
+liblua-clean:
+	cd src/lua && $(MAKE) clean
+
+clean: libenet-clean liblua-clean linux-clean
