@@ -673,3 +673,4 @@ struct package
     package() : name(NULL), type(-1), number(0), pending(false), source(NULL), curl(NULL) {}
 };
 #endif
+

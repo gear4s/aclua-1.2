@@ -1,10 +1,11 @@
-CXX = g++
+PREFIX=i586-mingw32msvc-
+CXX=g++ -Wl,-export-all-symbols
 DEFINES = -DSTANDALONE
 OBJECT_FLAGS = -O2 -Wall
 DSTDIR = win32_release
 SRCDIR = src
-INCLUDES = -Ienet/include -Iadditions/geoip -Isrc/lua/include
-LIBS = -Llib -lzdll -lenet -lws2_32 -lwinmm -Lsrc/lua/src -lluajit
+INCLUDES = -Ienet/include -Iadditions/geoip -Isrc/lua/include -Iinclude
+LIBS = -Llib -lzdll -lenet -lws2_32 -lwinmm -Lsrc/lua/src -llua51 
 LANES_SRCDIR = src/lanes/src
 LANES_DEFINES = -D_GNU_SOURCE -DNDEBUG
 LANES_OBJECT_FLAGS = $(OBJECT_FLAGS)
@@ -13,48 +14,49 @@ LANES_INCLUDES = -Isrc/lua/include
 
 TARGET = $(DSTDIR)/ac_server.exe
 
-OBJECTS = $(DSTDIR)/crypto.o /
-          $(DSTDIR)/log.o /
-          $(DSTDIR)/protocol.o /
-          $(DSTDIR)/serverms.o /
-          $(DSTDIR)/server.o /
-          $(DSTDIR)/stream.o /
-          $(DSTDIR)/tools.o /
-          $(DSTDIR)/wizard.o /
-          $(DSTDIR)/lua.o /
-          $(DSTDIR)/lua_tmr_library.o /
-          $(DSTDIR)/lua_cfg_library.o
+OBJECTS = $(DSTDIR)/crypto.o \
+          $(DSTDIR)/log.o \
+          $(DSTDIR)/protocol.o \
+          $(DSTDIR)/serverms.o \
+          $(DSTDIR)/server.o \
+          $(DSTDIR)/stream.o \
+          $(DSTDIR)/tools.o \
+          $(DSTDIR)/wizard.o \
+          $(DSTDIR)/lua.o \
+          $(DSTDIR)/lua_tmr_library.o \
+          $(DSTDIR)/lua_cfg_library.o \
+          $(DSTDIR)/module.o
 
-GEO_OBJECTS = $(DSTDIR)/GeoIP.o /
+GEO_OBJECTS = $(DSTDIR)/GeoIP.o \
               $(DSTDIR)/GeoIPCity.o
 
-MODULE_OBJECTS = $(DSTDIR)/geoip.o /
+MODULE_OBJECTS = $(DSTDIR)/geoip.o \
                  $(DSTDIR)/filesystem.o 
 
-LANES_OBJECTS = $(DSTDIR)/lanes_lanes.o /
-          $(DSTDIR)/threading_lanes.o /
-          $(DSTDIR)/keeper_lanes.o /
+LANES_OBJECTS = $(DSTDIR)/lanes_lanes.o \
+          $(DSTDIR)/threading_lanes.o \
+          $(DSTDIR)/keeper_lanes.o \
           $(DSTDIR)/tools_lanes.o
 
 all: make_DSTDIR $(TARGET)
 
 $(LANES_OBJECTS):
-	$(CXX) -c $(LANES_OBJECT_FLAGS) $(LANES_DEFINES) $(LANES_INCLUDES) -o $@ $(LANES_SRCDIR)/$(@F:_lanes.o=.cpp)
+	$(PREFIX)$(CXX) -c $(LANES_OBJECT_FLAGS) $(LANES_DEFINES) $(LANES_INCLUDES) -o $@ $(LANES_SRCDIR)/$(@F:_lanes.o=.cpp)
 
 $(OBJECTS):
-	$(CXX) -c $(OBJECT_FLAGS) $(DEFINES) $(INCLUDES) -o $@ $(SRCDIR)/$(@F:.o=.cpp)
+	$(PREFIX)$(CXX) -c $(OBJECT_FLAGS) $(DEFINES) $(INCLUDES) -o $@ $(SRCDIR)/$(@F:.o=.cpp)
 
 $(MODULE_OBJECTS):
-	$(CXX) -c $(OBJECT_FLAGS) $(DEFINES) $(INCLUDES) -o $@ $(SRCDIR)/modules/$(@F:.o=.cpp)
+	$(PREFIX)$(CXX) -c $(OBJECT_FLAGS) $(DEFINES) $(INCLUDES) -o $@ $(SRCDIR)/modules/$(@F:.o=.cpp)
 
 $(GEO_OBJECTS):
-	gcc -DGEOIPDATADIR -c $(OBJECT_FLAGS) $(DEFINES) $(INCLUDES) -o $@ additions/geoip/$(@F:.o=.c)
+	$(PREFIX)gcc -DGEOIPDATADIR -c $(OBJECT_FLAGS) $(DEFINES) $(INCLUDES) -o $@ additions/geoip/$(@F:.o=.c)
 
 $(TARGET): $(GEO_OBJECTS) $(MODULE_OBJECTS) $(OBJECTS) $(LANES_OBJECTS)
-	$(CXX) -o $(TARGET) $(OBJECTS) $(LANES_OBJECTS) $(MODULE_OBJECTS) $(GEO_OBJECTS) $(LIBS) -Wl,-rpath,.
+	$(PREFIX)$(CXX) -o $(TARGET) $(OBJECTS) $(LANES_OBJECTS) $(MODULE_OBJECTS) $(GEO_OBJECTS) $(LIBS) -Wl,-rpath,.
 
 make_DSTDIR:
-	mkdir $(DSTDIR)
+	mkdir -p $(DSTDIR)
 
 clean:
-	del $(OBJECTS) $(LANES_OBJECTS) $(TARGET) $(MODULE_OBJECTS) $(GEO_OBJECTS)
+	rm -f $(OBJECTS) $(LANES_OBJECTS) $(TARGET) $(MODULE_OBJECTS) $(GEO_OBJECTS)

@@ -1,4 +1,4 @@
-#define LUA_COMPAT_MODULE
+#define LUA_COPAT_MODULE
 
 extern "C"{
 #include <lua.h>
@@ -11,6 +11,30 @@ extern "C"{
 #include <string.h>
 }
 #include "../cube.h"
+
+#ifdef __WIN32
+enum
+  {
+    DT_UNKNOWN = 0,
+# define DT_UNKNOWN DT_UNKNOWN
+    DT_FIFO = 1,
+# define DT_FIFO    DT_FIFO
+    DT_CHR = 2,
+# define DT_CHR     DT_CHR
+    DT_DIR = 4,
+# define DT_DIR     DT_DIR
+    DT_BLK = 6,
+# define DT_BLK     DT_BLK
+    DT_REG = 8,
+# define DT_REG     DT_REG
+    DT_LNK = 10,
+# define DT_LNK     DT_LNK
+    DT_SOCK = 12,
+# define DT_SOCK    DT_SOCK
+    DT_WHT = 14
+# define DT_WHT     DT_WHT
+  };
+#endif
 
 class directory_iterator {
   public:
@@ -67,10 +91,12 @@ class directory_iterator {
       if (S_ISREG(info.st_mode))       file_type = DT_REG;
       else if (S_ISDIR(info.st_mode))  file_type = DT_DIR;
       else if (S_ISFIFO(info.st_mode)) file_type = DT_FIFO;
-      else if (S_ISLNK(info.st_mode))  file_type = DT_LNK;
-      else if (S_ISBLK(info.st_mode))  file_type = DT_BLK;
+      #ifndef __WIN32
+        else if (S_ISLNK(info.st_mode))  file_type = DT_LNK;
+        else if (S_ISBLK(info.st_mode))  file_type = DT_BLK;
+        else if (S_ISSOCK(info.st_mode)) file_type = DT_SOCK;
+      #endif
       else if (S_ISCHR(info.st_mode))  file_type = DT_CHR;
-      else if (S_ISSOCK(info.st_mode)) file_type = DT_SOCK;
       lua_pushinteger(L, file_type);
       lua_pushstring(L, entry->d_name);
 
