@@ -1,4 +1,4 @@
-#define LUA_COPAT_MODULE
+#define LUA_COMPAT_MODULE
 
 extern "C"{
 #include <lua.h>
@@ -11,6 +11,9 @@ extern "C"{
 #include <string.h>
 }
 #include "../cube.h"
+
+/*
+keeping incase someone fixes windows
 
 #ifdef __WIN32
 enum
@@ -35,6 +38,7 @@ enum
 # define DT_WHT     DT_WHT
   };
 #endif
+*/
 
 class directory_iterator {
   public:
@@ -91,18 +95,13 @@ class directory_iterator {
       if (S_ISREG(info.st_mode))       file_type = DT_REG;
       else if (S_ISDIR(info.st_mode))  file_type = DT_DIR;
       else if (S_ISFIFO(info.st_mode)) file_type = DT_FIFO;
-      #ifndef __WIN32
-        else if (S_ISLNK(info.st_mode))  file_type = DT_LNK;
-        else if (S_ISBLK(info.st_mode))  file_type = DT_BLK;
-        else if (S_ISSOCK(info.st_mode)) file_type = DT_SOCK;
-      #endif
       else if (S_ISCHR(info.st_mode))  file_type = DT_CHR;
       lua_pushinteger(L, file_type);
       lua_pushstring(L, entry->d_name);
 
       return 2;
     }
-    
+
   private:
     static int __gc(lua_State * L) {
       reinterpret_cast<directory_iterator *>(luaL_checkudata(L, 1, MT))->~directory_iterator();
